@@ -45,8 +45,6 @@ contract owned {
 
 }
 
-
-
 contract TokenERC20{
 
     function totalSupply() constant external returns (uint256) {
@@ -62,8 +60,6 @@ contract TokenERC20{
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
-
 contract UNICToken is owned, TokenERC20 {
     
     using SafeMath for uint;
@@ -74,6 +70,7 @@ contract UNICToken is owned, TokenERC20 {
     
     uint256 public totalSupply = 250000000 * 10 ** uint256(decimals);
     
-    
-    
+    mapping (address => uint256) public balances;
+    mapping (address => mapping (address => uint256)) public allowance;
+   
 }
