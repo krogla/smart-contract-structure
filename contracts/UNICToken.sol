@@ -57,7 +57,9 @@ contract TokenERC20{
 
 
 
-contract UNICToken is owned, TokenERC20, SafeMath {
+contract UNICToken is owned, TokenERC20 {
+    
+    using SafeMath for uint;
     
     string public constant name = 'UNIC';
     string public constant symbol = 'UNIC';
