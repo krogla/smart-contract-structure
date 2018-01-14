@@ -29,8 +29,8 @@ UNICPlatform will be the contract that will be able to:
 
 The PPSContract is ERC20 Library for import to advertisers smart-contracts. It will be able to:
 
-lock in UNICToken through transferFrom, an ERC20 standard function
-transfer UNICToken from advertiser address to publisher address after confirmed sale
+* lock in UNICToken through transferFrom, an ERC20 standard function
+* transfer UNICToken from advertiser address to publisher address after confirmed sale
 
 ## Authors
 
