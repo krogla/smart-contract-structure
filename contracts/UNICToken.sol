@@ -29,13 +29,16 @@ library SafeMath {
 
 contract owned {
     address public owner;
+
     function owned() public {
         owner = msg.sender;
     }
+
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
     }
+
 }
 
 contract ERC20Basic {
@@ -53,14 +56,18 @@ contract ERC20 is ERC20Basic {
 }
 
 contract BasicToken is ERC20Basic {
+    
   using SafeMath for uint256;
+ 
   mapping (address => uint256) public balances;
-  
+ 
   function transfer(address _to, uint256 _value) returns (bool) {
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    Transfer(msg.sender, _to, _value);
-    return true;
+    if (balances[msg.sender] >= _value && balances[_to] + _value > balances[_to] && _value > 0 && _to != address(this) && _to != address(0)) {
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    } else { return false; }
   }
 
   function balanceOf(address _owner) constant returns (uint256 balance) {
@@ -69,15 +76,20 @@ contract BasicToken is ERC20Basic {
 }
 
 contract StandardToken is ERC20, BasicToken {
+ 
   mapping (address => mapping (address => uint256)) allowed;
  
   function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-    var _allowance = allowed[_from][msg.sender];
-    balances[_to] = balances[_to].add(_value);
-    balances[_from] = balances[_from].sub(_value);
-    allowed[_from][msg.sender] = _allowance.sub(_value);
-    Transfer(_from, _to, _value);
-    return true;
+    if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && balances[_to] + _value > balances[_to] && _value > 0 && _to != address(this) && _to != address(0)) {
+        var _allowance = allowed[_from][msg.sender];
+        balances[_to] = balances[_to].add(_value);
+        balances[_from] = balances[_from].sub(_value);
+        allowed[_from][msg.sender] = _allowance.sub(_value);
+        Transfer(_from, _to, _value);
+        return true;
+    }else {
+        return false;
+    }
   }
 
   function approve(address _spender, uint256 _value) returns (bool) {
@@ -90,24 +102,32 @@ contract StandardToken is ERC20, BasicToken {
   function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
+ 
 }
 
-contract UNICToken is owned, StandardToken { 
+contract UNICToken is owned, StandardToken {
+    
     using SafeMath for uint;
+    
     string public constant name = 'UNICToken';
     string public constant symbol = 'UNIC';
     uint8 public constant decimals = 18;
+    
     uint256 public INITIAL_SUPPLY = 250000000 * 1 ether;
 
     function UNICToken() {
       totalSupply = INITIAL_SUPPLY;
       balances[msg.sender] = INITIAL_SUPPLY;
     }
+    
 }
 
 contract Crowdsale is owned {
+    
   using SafeMath for uint;
+  
   UNICToken public token = new UNICToken();
+  
   address multisig;
   uint restrictedPercent;
   address restricted;
@@ -119,9 +139,9 @@ contract Crowdsale is owned {
     multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
     restricted = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
     restrictedPercent = 40;
-    rate = 100000000000000000000;
-    start = 1500379200;
-    period = 28;
+    rate = 840;
+    start = 1517392800;
+    period = 10;
   }
  
   modifier saleIsOn() {
@@ -149,4 +169,5 @@ contract Crowdsale is owned {
   function() external payable {
     sellTokens();
   }
+    
 }
