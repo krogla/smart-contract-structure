@@ -1,9 +1,5 @@
 pragma solidity ^0.4.18;
 
-/**
- * @title SafeMath
- * @dev Math operations with safety checks that throw on error
- */
 library SafeMath {
   function mul(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a == 0) {
@@ -33,25 +29,17 @@ library SafeMath {
 
 contract owned {
     address public owner;
-
     function owned() public {
         owner = msg.sender;
     }
-
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
     }
-
 }
 
 contract ERC20Basic {
   uint256 public totalSupply;
-  /**
-  function totalSupply() constant external returns (uint256) {
-      return _supply;
-  }
-  */
   function balanceOf(address owner) public constant returns (uint256 balance);
   function transfer(address to, uint256 value) public returns (bool success);
   event Transfer(address indexed from, address indexed to, uint256 value);
@@ -65,11 +53,9 @@ contract ERC20 is ERC20Basic {
 }
 
 contract BasicToken is ERC20Basic {
-    
   using SafeMath for uint256;
- 
   mapping (address => uint256) public balances;
- 
+  
   function transfer(address _to, uint256 _value) returns (bool) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
@@ -80,11 +66,9 @@ contract BasicToken is ERC20Basic {
   function balanceOf(address _owner) constant returns (uint256 balance) {
     return balances[_owner];
   }
- 
 }
 
 contract StandardToken is ERC20, BasicToken {
- 
   mapping (address => mapping (address => uint256)) allowed;
  
   function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
@@ -106,34 +90,24 @@ contract StandardToken is ERC20, BasicToken {
   function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
- 
 }
 
-contract UNICToken is owned, StandardToken {
-    
+contract UNICToken is owned, StandardToken { 
     using SafeMath for uint;
-    
     string public constant name = 'UNICToken';
     string public constant symbol = 'UNIC';
     uint8 public constant decimals = 18;
-    
-    uint256 public totalSupply = 250000000 * 10 ** uint256(decimals);
-    
     uint256 public INITIAL_SUPPLY = 250000000 * 1 ether;
 
     function UNICToken() {
       totalSupply = INITIAL_SUPPLY;
       balances[msg.sender] = INITIAL_SUPPLY;
     }
-    
 }
 
 contract Crowdsale is owned {
-    
   using SafeMath for uint;
-  
   UNICToken public token = new UNICToken();
-  
   address multisig;
   uint restrictedPercent;
   address restricted;
@@ -175,5 +149,4 @@ contract Crowdsale is owned {
   function() external payable {
     sellTokens();
   }
-    
 }
