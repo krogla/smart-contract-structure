@@ -61,7 +61,7 @@ contract BasicToken is ERC20Basic {
  
   mapping (address => uint256) public balances;
  
-  function transfer(address _to, uint256 _value) returns (bool) {
+  function transfer(address _to, uint256 _value) public returns (bool) {
     if (balances[msg.sender] >= _value && balances[_to] + _value > balances[_to] && _value > 0 && _to != address(this) && _to != address(0)) {
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
@@ -70,7 +70,7 @@ contract BasicToken is ERC20Basic {
     } else { return false; }
   }
 
-  function balanceOf(address _owner) constant returns (uint256 balance) {
+  function balanceOf(address _owner) public constant returns (uint256 balance) {
     return balances[_owner];
   }
 }
@@ -79,7 +79,7 @@ contract StandardToken is ERC20, BasicToken {
  
   mapping (address => mapping (address => uint256)) allowed;
  
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && balances[_to] + _value > balances[_to] && _value > 0 && _to != address(this) && _to != address(0)) {
         var _allowance = allowed[_from][msg.sender];
         balances[_to] = balances[_to].add(_value);
@@ -87,19 +87,18 @@ contract StandardToken is ERC20, BasicToken {
         allowed[_from][msg.sender] = _allowance.sub(_value);
         Transfer(_from, _to, _value);
         return true;
-    }else {
-        return false;
-    }
+    } else { return false; }
   }
 
-  function approve(address _spender, uint256 _value) returns (bool) {
-    require((_value == 0) || (allowed[msg.sender][_spender] == 0));
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
-    return true;
+  function approve(address _spender, uint256 _value) public returns (bool) {
+      if (((_value == 0) || (allowed[msg.sender][_spender] == 0)) && _spender != address(this) && _spender != address(0)) {
+          allowed[msg.sender][_spender] = _value;
+          Approval(msg.sender, _spender, _value);
+          return true;
+      } else { return false; }
   }
 
-  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
  
@@ -113,11 +112,11 @@ contract UNICToken is owned, StandardToken {
     string public constant symbol = 'UNIC';
     uint8 public constant decimals = 18;
     
-    uint256 public INITIAL_SUPPLY = 250000000 * 1 ether;
+    uint256 public initialSupply = 250000000 * 10 ** uint256(decimals);
 
     function UNICToken() {
-      totalSupply = INITIAL_SUPPLY;
-      balances[msg.sender] = INITIAL_SUPPLY;
+      totalSupply = initialSupply;
+      balances[msg.sender] = initialSupply;
     }
     
 }
