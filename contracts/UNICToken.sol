@@ -38,7 +38,6 @@ contract owned {
         require(msg.sender == owner);
         _;
     }
-
 }
 
 contract ERC20Basic {
@@ -76,7 +75,7 @@ contract BasicToken is ERC20Basic {
 }
 
 contract StandardToken is ERC20, BasicToken {
- 
+
   mapping (address => mapping (address => uint256)) allowed;
  
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
@@ -106,19 +105,34 @@ contract StandardToken is ERC20, BasicToken {
 
 contract UNICToken is owned, StandardToken {
     
-    using SafeMath for uint;
-    
     string public constant name = 'UNICToken';
     string public constant symbol = 'UNIC';
     uint8 public constant decimals = 18;
     
     uint256 public initialSupply = 250000000 * 10 ** uint256(decimals);
 
+    mapping (address => uint256) public KYC;
+
     function UNICToken() {
       totalSupply = initialSupply;
       balances[msg.sender] = initialSupply;
     }
-    
+
+    function approveKYC(address _contributor) onlyOwner {
+      if(_contributor != 0x0){
+        KYC[_contributor] = 1;
+      }
+    }
+
+    function KYCstatus(address _contributor) public returns (string){
+      if(_contributor != 0x0){
+        if(KYC[_contributor]==1){
+          return 'KYC approved';
+        }else{
+          return 'KYC not verified';
+        }
+      }
+    }   
 }
 
 contract Crowdsale is owned {
@@ -129,47 +143,61 @@ contract Crowdsale is owned {
   
   address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
   address constant restricted = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
-  uint presaleStart;
-  uint presaleEnd;
-  uint start;
-  uint period;
-  uint rate;
+  uint constant rate = 840;
+  
+  uint constant presaleStart = 1518084000;        /** 08.02 */
+  uint constant presaleEnd = 1518861600;          /** 17.02 */
+  uint constant presaleDiscount = 30;
+  uint constant presaleTokensLimit = 4250000;
+
+  uint constant firstRoundICOStart = 1520503200;  /** 08.03 */
+  uint constant firstRoundICOEnd = 1521712800;    /** 22.03 */
+  uint constant firstRoundICODiscount = 15;
+  uint constant firstRoundICOTokensLimit = 12500000;
+
+  uint constant secondRoundICOStart = 1522922400; /** 05.04 */
+  uint constant secondRoundICOEnd = 1524736800;   /** 26.04 */
+  uint constant secondRoundICOTokensLimit = 37500000;
+
+  uint public etherRaised;
+  uint public tokensSold;
  
   function Crowdsale() {
-    rate = 840;
-                                      /** 31.01 - 07.02 whitelist 1517392800 */
-    presaleStart = 1518084000;        /** 08.02 */
-    presaleEnd = 1518861600;          /** 17.02 */
-    firstRoundICOStart = 1520503200;  /** 08.03 */
-    firstRoundICOEnd = 1521712800;    /** 22.03 */
-    secondRoundICOStart = 1522922400; /** 05.04 */
-    secondRoundICOEnd = 1524736800;   /** 26.04 */
+    etherRaised = 0;
+    tokensSold = 0;
   }
  
   modifier saleIsOn() {
-    require(now > start && now < start + period * 1 days);
+    require(
+      (now >= presaleStart && now <= presaleEnd && presaleTokensLimit > tokensSold)
+      (now >= firstRoundICOStart && now <= firstRoundICOEnd && firstRoundICOTokensLimit > tokensSold)
+      (now >= secondRoundICOStart && now <= secondRoundICOEnd && secondRoundICOTokensLimit > tokensSold)
+      );
     _;
   }
  
-  function sellTokens() saleIsOn payable {
+  function sellTokens(address _buyer) saleIsOn payable private {
+    assert(_buyer != 0x0);
+    require(msg.value > 0);
+
+    etherRaised = etherRaised.add(msg.value);
     multisig.transfer(msg.value);
     uint tokens = rate.mul(msg.value).div(1 ether);
-    uint bonusTokens = 0;
-    if(now < start + (period * 1 days).div(4)) {
-      bonusTokens = tokens.div(4);
-    } else if(now >= start + (period * 1 days).div(4) && now < start + (period * 1 days).div(4).mul(2)) {
-      bonusTokens = tokens.div(10);
-    } else if(now >= start + (period * 1 days).div(4).mul(2) && now < start + (period * 1 days).div(4).mul(3)) {
-      bonusTokens = tokens.div(20);
-    }
-    uint tokensWithBonus = tokens.add(bonusTokens);
+    uint discountTokens = 0;
+    if(now >= presaleStart && now <= presaleEnd) {discountTokens = tokens.mul(presaleDiscount).div(100);}
+    if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {discountTokens = tokens.mul(firstRoundICODiscount).div(100);}
+
+    uint tokensWithBonus = tokens.add(discountTokens);
+    tokensSold = tokensSold.add(tokensWithBonus);
     token.transfer(msg.sender, tokensWithBonus);
-    uint restrictedTokens = tokens.mul(restrictedPercent).div(100 - restrictedPercent);
-    token.transfer(restricted, restrictedTokens);
   }
  
   function() external payable {
-    sellTokens();
+    sellTokens(msg.sender);
+  }
+
+  function crowdsaleDetails() public constant returns (uint, uint) {
+    return (etherRaised,tokensSold);
   }
     
 }
