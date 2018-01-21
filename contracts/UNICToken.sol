@@ -113,12 +113,22 @@ contract UNICToken is owned, StandardToken {
 
     mapping (address => uint256) public KYC;
 
-    function UNICToken() {
+    modifier onlyManager() {
+      require(msg.sender == icoManager);
+      _;
+    }
+
+    function UNICToken() onlyOwner {
       totalSupply = initialSupply;
       balances[msg.sender] = initialSupply;
     }
 
-    function approveKYC(address _contributor) onlyOwner {
+    function setICOManager(address _newIcoManager) onlyOwner {
+      assert(_newIcoManager != 0x0);
+      icoManager = _newIcoManager;
+    }
+
+    function approveKYC(address _contributor) onlyManager {
       if(_contributor != 0x0){
         KYC[_contributor] = 1;
       }
@@ -161,12 +171,9 @@ contract Crowdsale is owned {
 
   uint public etherRaised;
   uint public tokensSold;
- 
-  function Crowdsale() {
-    etherRaised = 0;
-    tokensSold = 0;
-  }
- 
+
+  address public icoManager;
+
   modifier saleIsOn() {
     require(
       (now >= presaleStart && now <= presaleEnd && presaleTokensLimit > tokensSold)
@@ -175,21 +182,28 @@ contract Crowdsale is owned {
       );
     _;
   }
- 
+
+  function Crowdsale() onlyManager {
+    etherRaised = 0;
+    tokensSold = 0;
+  }
+
   function sellTokens(address _buyer) saleIsOn payable private {
     assert(_buyer != 0x0);
-    require(msg.value > 0);
+    if(KYC[_buyer]==1){
+      require(msg.value > 0);
 
-    etherRaised = etherRaised.add(msg.value);
-    multisig.transfer(msg.value);
-    uint tokens = rate.mul(msg.value).div(1 ether);
-    uint discountTokens = 0;
-    if(now >= presaleStart && now <= presaleEnd) {discountTokens = tokens.mul(presaleDiscount).div(100);}
-    if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {discountTokens = tokens.mul(firstRoundICODiscount).div(100);}
+      etherRaised = etherRaised.add(msg.value);
+      multisig.transfer(msg.value);
+      uint tokens = rate.mul(msg.value).div(1 ether);
+      uint discountTokens = 0;
+      if(now >= presaleStart && now <= presaleEnd) {discountTokens = tokens.mul(presaleDiscount).div(100);}
+      if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {discountTokens = tokens.mul(firstRoundICODiscount).div(100);}
 
-    uint tokensWithBonus = tokens.add(discountTokens);
-    tokensSold = tokensSold.add(tokensWithBonus);
-    token.transfer(msg.sender, tokensWithBonus);
+      uint tokensWithBonus = tokens.add(discountTokens);
+      tokensSold = tokensSold.add(tokensWithBonus);
+      token.transfer(msg.sender, tokensWithBonus);
+    }
   }
  
   function() external payable {
