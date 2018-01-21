@@ -56,8 +56,7 @@ contract ERC20 is ERC20Basic {
 
 contract BasicToken is ERC20Basic {
     
-  using SafeMath for uint256;
- 
+  using SafeMath for uint256; 
   mapping (address => uint256) public balances;
  
   function transfer(address _to, uint256 _value) public returns (bool) {
@@ -100,7 +99,6 @@ contract StandardToken is ERC20, BasicToken {
   function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
- 
 }
 
 contract UNICToken is owned, StandardToken {
@@ -152,7 +150,6 @@ contract Crowdsale is owned {
   UNICToken public token = new UNICToken();
   
   address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
-  address constant restricted = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
   uint constant rate = 840;
   
   uint constant presaleStart = 1518084000;        /** 08.02 */
@@ -190,8 +187,7 @@ contract Crowdsale is owned {
 
   function sellTokens(address _buyer) saleIsOn payable private {
     assert(_buyer != 0x0);
-    if(KYC[_buyer]==1){
-      require(msg.value > 0);
+    if(KYC[_buyer]==1 && msg.value > 0){
 
       etherRaised = etherRaised.add(msg.value);
       multisig.transfer(msg.value);
