@@ -127,20 +127,23 @@ contract Crowdsale is owned {
   
   UNICToken public token = new UNICToken();
   
-  address multisig;
-  uint restrictedPercent;
-  address restricted;
+  address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
+  address constant restricted = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
+  uint presaleStart;
+  uint presaleEnd;
   uint start;
   uint period;
   uint rate;
  
   function Crowdsale() {
-    multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
-    restricted = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
-    restrictedPercent = 40;
     rate = 840;
-    start = 1517392800;
-    period = 10;
+                                      /** 31.01 - 07.02 whitelist 1517392800 */
+    presaleStart = 1518084000;        /** 08.02 */
+    presaleEnd = 1518861600;          /** 17.02 */
+    firstRoundICOStart = 1520503200;  /** 08.03 */
+    firstRoundICOEnd = 1521712800;    /** 22.03 */
+    secondRoundICOStart = 1522922400; /** 05.04 */
+    secondRoundICOEnd = 1524736800;   /** 26.04 */
   }
  
   modifier saleIsOn() {
