@@ -56,7 +56,8 @@ contract ERC20 is ERC20Basic {
 
 contract BasicToken is ERC20Basic {
     
-  using SafeMath for uint256; 
+  using SafeMath for uint256;
+ 
   mapping (address => uint256) public balances;
  
   function transfer(address _to, uint256 _value) public returns (bool) {
@@ -99,40 +100,47 @@ contract StandardToken is ERC20, BasicToken {
   function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
+ 
 }
 
-contract UNICToken is owned, StandardToken {
+contract KYCToken is StandardToken {
+      mapping (address => uint256) public KYC;
+      
+      function KYCstatus(address _contributor) external returns (string);
+}
+
+contract UNICToken is owned, KYCToken {
     
     string public constant name = 'UNICToken';
     string public constant symbol = 'UNIC';
     uint8 public constant decimals = 18;
     
     uint256 public initialSupply = 250000000 * 10 ** uint256(decimals);
-
-    mapping (address => uint256) public KYC;
+    
+    address public icoManager;
 
     modifier onlyManager() {
       require(msg.sender == icoManager);
       _;
     }
 
-    function UNICToken() onlyOwner {
+    function UNICToken() public onlyOwner {
       totalSupply = initialSupply;
       balances[msg.sender] = initialSupply;
     }
 
-    function setICOManager(address _newIcoManager) onlyOwner {
+    function setICOManager(address _newIcoManager) private onlyOwner {
       assert(_newIcoManager != 0x0);
       icoManager = _newIcoManager;
     }
 
-    function approveKYC(address _contributor) onlyManager {
+    function approveKYC(address _contributor) private onlyManager {
       if(_contributor != 0x0){
         KYC[_contributor] = 1;
       }
     }
 
-    function KYCstatus(address _contributor) public returns (string){
+    function KYCstatus(address _contributor) external returns (string){
       if(_contributor != 0x0){
         if(KYC[_contributor]==1){
           return 'KYC approved';
@@ -143,7 +151,7 @@ contract UNICToken is owned, StandardToken {
     }   
 }
 
-contract Crowdsale is owned {
+contract Crowdsale is owned, KYCToken {
     
   using SafeMath for uint;
   
@@ -152,40 +160,37 @@ contract Crowdsale is owned {
   address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
   uint constant rate = 840;
   
-  uint constant presaleStart = 1518084000;        /** 08.02 */
-  uint constant presaleEnd = 1518861600;          /** 17.02 */
-  uint constant presaleDiscount = 30;
-  uint constant presaleTokensLimit = 4250000;
+  uint public constant presaleStart = 1518084000;        /** 08.02 */
+  uint public presaleEnd = 1518861600;          /** 17.02 */
+  uint public presaleDiscount = 30;
+  uint public presaleTokensLimit = 4250000 * 1000000000000000000;
 
-  uint constant firstRoundICOStart = 1520503200;  /** 08.03 */
-  uint constant firstRoundICOEnd = 1521712800;    /** 22.03 */
-  uint constant firstRoundICODiscount = 15;
-  uint constant firstRoundICOTokensLimit = 12500000;
+  uint public firstRoundICOStart = 1520503200;  /** 08.03 */
+  uint public firstRoundICOEnd = 1521712800;    /** 22.03 */
+  uint public firstRoundICODiscount = 15;
+  uint public firstRoundICOTokensLimit = 12500000 * 1000000000000000000;
 
-  uint constant secondRoundICOStart = 1522922400; /** 05.04 */
-  uint constant secondRoundICOEnd = 1524736800;   /** 26.04 */
-  uint constant secondRoundICOTokensLimit = 37500000;
+  uint public secondRoundICOStart = 1522922400; /** 05.04 */
+  uint public secondRoundICOEnd = 1524736800;   /** 26.04 */
+  uint public secondRoundICOTokensLimit = 37500000 * 1000000000000000000;
 
   uint public etherRaised;
   uint public tokensSold;
 
-  address public icoManager;
-
   modifier saleIsOn() {
-    require(
-      (now >= presaleStart && now <= presaleEnd && presaleTokensLimit > tokensSold)
+    require((now >= presaleStart && now <= presaleEnd && presaleTokensLimit > tokensSold) ||
       (now >= firstRoundICOStart && now <= firstRoundICOEnd && firstRoundICOTokensLimit > tokensSold)
-      (now >= secondRoundICOStart && now <= secondRoundICOEnd && secondRoundICOTokensLimit > tokensSold)
+      || (now >= secondRoundICOStart && now <= secondRoundICOEnd && secondRoundICOTokensLimit > tokensSold)
       );
     _;
   }
 
-  function Crowdsale() onlyManager {
+  function Crowdsale() internal onlyOwner {
     etherRaised = 0;
     tokensSold = 0;
   }
 
-  function sellTokens(address _buyer) saleIsOn payable private {
+  function sellTokens(address _buyer) saleIsOn public payable {
     assert(_buyer != 0x0);
     if(KYC[_buyer]==1 && msg.value > 0){
 
