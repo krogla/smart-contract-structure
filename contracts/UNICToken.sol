@@ -103,10 +103,12 @@ contract StandardToken is ERC20, BasicToken {
  
 }
 
-contract KYCToken is StandardToken {
-      mapping (address => uint256) public KYC;
+contract KYCToken is StandardToken, owned {
+    mapping (address => uint256) public KYC;
       
-      function KYCstatus(address _contributor) external returns (string);
+    function KYCstatus(address _contributor) public returns (string);
+    
+    function setICOManager(address _newIcoManager) public returns (bool);
 }
 
 contract UNICToken is owned, KYCToken {
@@ -120,8 +122,8 @@ contract UNICToken is owned, KYCToken {
     address public icoManager;
 
     modifier onlyManager() {
-      require(msg.sender == icoManager);
-      _;
+        require(msg.sender == icoManager);
+        _;
     }
 
     function UNICToken() public onlyOwner {
@@ -129,18 +131,18 @@ contract UNICToken is owned, KYCToken {
       balances[msg.sender] = initialSupply;
     }
 
-    function setICOManager(address _newIcoManager) private onlyOwner {
+    function setICOManager(address _newIcoManager) public onlyOwner returns (bool) {
       assert(_newIcoManager != 0x0);
       icoManager = _newIcoManager;
     }
 
-    function approveKYC(address _contributor) private onlyManager {
+    function approveKYC(address _contributor) public onlyManager {
       if(_contributor != 0x0){
         KYC[_contributor] = 1;
       }
     }
 
-    function KYCstatus(address _contributor) external returns (string){
+    function KYCstatus(address _contributor) public returns (string){
       if(_contributor != 0x0){
         if(KYC[_contributor]==1){
           return 'KYC approved';
