@@ -167,31 +167,32 @@ contract Crowdsale is owned, KYCToken {
   UNICToken public token = new UNICToken();
   
   address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
-  uint constant rate = 840;
+  uint constant rate = 3400;
   
-  uint public constant presaleStart = 1518084000;        /** 08.02 */
-  uint public presaleEnd = 1518861600;          /** 17.02 */
+  uint public constant presaleStart = 1518084000;   /** 08.02 */
+  uint public presaleEnd = 1518861600;              /** 17.02 */
   uint public presaleDiscount = 30;
   uint public presaleTokensLimit = 4250000 * 1000000000000000000;
   uint public presaleWhitelistDiscount = 40;
   uint public presaleWhitelistTokensLimit = 750000 * 1000000000000000000;
 
-  uint public firstRoundICOStart = 1520503200;  /** 08.03 */
-  uint public firstRoundICOEnd = 1521712800;    /** 22.03 */
+  uint public firstRoundICOStart = 1520503200;      /** 08.03 */
+  uint public firstRoundICOEnd = 1521712800;        /** 22.03 */
   uint public firstRoundICODiscount = 15;
   uint public firstRoundICOTokensLimit = 6250000 * 1000000000000000000;
 
-  uint public secondRoundICOStart = 1522922400; /** 05.04 */
-  uint public secondRoundICOEnd = 1524736800;   /** 26.04 */
+  uint public secondRoundICOStart = 1522922400;     /** 05.04 */
+  uint public secondRoundICOEnd = 1524736800;       /** 26.04 */
   uint public secondRoundICOTokensLimit = 43750000 * 1000000000000000000;
 
   uint public etherRaised;
   uint public tokensSold;
+  uint public tokensSoldWhitelist;
 
   modifier saleIsOn() {
-    require((now >= presaleStart && now <= presaleEnd && presaleTokensLimit > tokensSold) ||
-      (now >= firstRoundICOStart && now <= firstRoundICOEnd && firstRoundICOTokensLimit > tokensSold)
-      || (now >= secondRoundICOStart && now <= secondRoundICOEnd && secondRoundICOTokensLimit > tokensSold)
+    require((now >= presaleStart && now <= presaleEnd) ||
+      (now >= firstRoundICOStart && now <= firstRoundICOEnd)
+      || (now >= secondRoundICOStart && now <= secondRoundICOEnd)
       );
     _;
   }
@@ -205,8 +206,6 @@ contract Crowdsale is owned, KYCToken {
     assert(_buyer != 0x0);
     if(KYC[_buyer]==1 && msg.value > 0){
 
-      multisig.transfer(msg.value);
-      etherRaised = etherRaised.add(msg.value);
       uint tokens = rate.mul(msg.value).div(1 ether);
       uint discountTokens = 0;
       if(now >= presaleStart && now <= presaleEnd) {
@@ -216,11 +215,27 @@ contract Crowdsale is owned, KYCToken {
               discountTokens = tokens.mul(presaleDiscount).div(100);
           }
       }
-      if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {discountTokens = tokens.mul(firstRoundICODiscount).div(100);}
+      if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {
+          discountTokens = tokens.mul(firstRoundICODiscount).div(100);
+      }
 
       uint tokensWithBonus = tokens.add(discountTokens);
-      tokensSold = tokensSold.add(tokensWithBonus);
+      
+      if(
+          (now >= presaleStart && now <= presaleEnd && presaleTokensLimit > tokensSold + tokensWithBonus &&
+            ((WhiteList[_buyer]==1 && presaleWhitelistTokensLimit > tokensSoldWhitelist + tokensWithBonus) || WhiteList[_buyer]!=1)
+          ) ||
+          (now >= firstRoundICOStart && now <= firstRoundICOEnd && firstRoundICOTokensLimit > tokensSold + tokensWithBonus) ||
+          (now >= secondRoundICOStart && now <= secondRoundICOEnd && secondRoundICOTokensLimit > tokensSold + tokensWithBonus)
+      )
+      
+      multisig.transfer(msg.value);
+      etherRaised = etherRaised.add(msg.value);
       token.transfer(msg.sender, tokensWithBonus);
+      tokensSold = tokensSold.add(tokensWithBonus);
+      if(WhiteList[_buyer]==1) {
+          tokensSoldWhitelist = tokensSoldWhitelist.add(tokensWithBonus);
+      }
     }
   }
  
@@ -229,7 +244,7 @@ contract Crowdsale is owned, KYCToken {
   }
 
   function crowdsaleDetails() public constant returns (uint, uint) {
-    return (etherRaised,tokensSold);
+    return (etherRaised,tokensSold,tokensSoldWhitelist);
   }
     
 }
