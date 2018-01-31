@@ -105,6 +105,7 @@ contract StandardToken is ERC20, BasicToken {
 
 contract KYCToken is StandardToken, owned {
     mapping (address => uint256) public KYC;
+    mapping (address => uint256) public WhiteList;
       
     function KYCstatus(address _contributor) public returns (string);
     
@@ -141,6 +142,12 @@ contract UNICToken is owned, KYCToken {
         KYC[_contributor] = 1;
       }
     }
+    
+    function setWhiteList(address _contributor) public onlyManager {
+      if(_contributor != 0x0){
+        WhiteList[_contributor] = 1;
+      }
+    }
 
     function KYCstatus(address _contributor) public returns (string){
       if(_contributor != 0x0){
@@ -166,15 +173,17 @@ contract Crowdsale is owned, KYCToken {
   uint public presaleEnd = 1518861600;          /** 17.02 */
   uint public presaleDiscount = 30;
   uint public presaleTokensLimit = 4250000 * 1000000000000000000;
+  uint public presaleWhitelistDiscount = 40;
+  uint public presaleWhitelistTokensLimit = 750000 * 1000000000000000000;
 
   uint public firstRoundICOStart = 1520503200;  /** 08.03 */
   uint public firstRoundICOEnd = 1521712800;    /** 22.03 */
   uint public firstRoundICODiscount = 15;
-  uint public firstRoundICOTokensLimit = 12500000 * 1000000000000000000;
+  uint public firstRoundICOTokensLimit = 6250000 * 1000000000000000000;
 
   uint public secondRoundICOStart = 1522922400; /** 05.04 */
   uint public secondRoundICOEnd = 1524736800;   /** 26.04 */
-  uint public secondRoundICOTokensLimit = 37500000 * 1000000000000000000;
+  uint public secondRoundICOTokensLimit = 43750000 * 1000000000000000000;
 
   uint public etherRaised;
   uint public tokensSold;
@@ -196,11 +205,17 @@ contract Crowdsale is owned, KYCToken {
     assert(_buyer != 0x0);
     if(KYC[_buyer]==1 && msg.value > 0){
 
-      etherRaised = etherRaised.add(msg.value);
       multisig.transfer(msg.value);
+      etherRaised = etherRaised.add(msg.value);
       uint tokens = rate.mul(msg.value).div(1 ether);
       uint discountTokens = 0;
-      if(now >= presaleStart && now <= presaleEnd) {discountTokens = tokens.mul(presaleDiscount).div(100);}
+      if(now >= presaleStart && now <= presaleEnd) {
+          if(WhiteList[_buyer]==1) {
+              discountTokens = tokens.mul(presaleWhitelistDiscount).div(100);
+          }else{
+              discountTokens = tokens.mul(presaleDiscount).div(100);
+          }
+      }
       if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {discountTokens = tokens.mul(firstRoundICODiscount).div(100);}
 
       uint tokensWithBonus = tokens.add(discountTokens);
