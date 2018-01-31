@@ -249,4 +249,3 @@ contract Crowdsale is owned, KYCToken {
   }
     
 }
-
