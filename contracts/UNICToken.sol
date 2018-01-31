@@ -200,6 +200,7 @@ contract Crowdsale is owned, KYCToken {
   function Crowdsale() internal onlyOwner {
     etherRaised = 0;
     tokensSold = 0;
+    tokensSoldWhitelist = 0;
   }
 
   function sellTokens(address _buyer) saleIsOn public payable {
@@ -243,8 +244,9 @@ contract Crowdsale is owned, KYCToken {
     sellTokens(msg.sender);
   }
 
-  function crowdsaleDetails() public constant returns (uint, uint) {
-    return (etherRaised,tokensSold,tokensSoldWhitelist);
+  function crowdsaleDetails() public constant returns (uint, uint, uint) {
+    return (etherRaised, tokensSold, tokensSoldWhitelist);
   }
     
 }
+
