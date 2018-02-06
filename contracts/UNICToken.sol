@@ -103,16 +103,7 @@ contract StandardToken is ERC20, BasicToken {
  
 }
 
-contract KYCToken is StandardToken, owned {
-    mapping (address => uint256) public KYC;
-    mapping (address => uint256) public WhiteList;
-      
-    function KYCstatus(address _contributor) public returns (string);
-    
-    function setICOManager(address _newIcoManager) public returns (bool);
-}
-
-contract UNICToken is owned, KYCToken {
+contract UNICToken is owned, StandardToken {
     
     string public constant name = 'UNICToken';
     string public constant symbol = 'UNIC';
@@ -121,6 +112,8 @@ contract UNICToken is owned, KYCToken {
     uint256 public initialSupply = 250000000 * 10 ** uint256(decimals);
     
     address public icoManager;
+    
+    mapping (address => uint256) public WhiteList;
 
     modifier onlyManager() {
         require(msg.sender == icoManager);
@@ -136,31 +129,15 @@ contract UNICToken is owned, KYCToken {
       assert(_newIcoManager != 0x0);
       icoManager = _newIcoManager;
     }
-
-    function approveKYC(address _contributor) public onlyManager {
-      if(_contributor != 0x0){
-        KYC[_contributor] = 1;
-      }
-    }
     
     function setWhiteList(address _contributor) public onlyManager {
       if(_contributor != 0x0){
         WhiteList[_contributor] = 1;
       }
     }
-
-    function KYCstatus(address _contributor) public returns (string){
-      if(_contributor != 0x0){
-        if(KYC[_contributor]==1){
-          return 'KYC approved';
-        }else{
-          return 'KYC not verified';
-        }
-      }
-    }   
 }
 
-contract Crowdsale is owned, KYCToken {
+contract Crowdsale is owned, UNICToken {
     
   using SafeMath for uint;
   
@@ -205,7 +182,7 @@ contract Crowdsale is owned, KYCToken {
 
   function sellTokens(address _buyer) saleIsOn public payable {
     assert(_buyer != 0x0);
-    if(KYC[_buyer]==1 && msg.value > 0){
+    if(msg.value > 0){
 
       uint tokens = rate.mul(msg.value).div(1 ether);
       uint discountTokens = 0;
