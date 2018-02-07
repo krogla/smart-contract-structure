@@ -174,13 +174,17 @@ contract Crowdsale is owned, UNICToken {
     _;
   }
 
-  function Crowdsale() internal onlyOwner {
+  function Crowdsale() public onlyOwner {
     etherRaised = 0;
     tokensSold = 0;
     tokensSoldWhitelist = 0;
   }
+  
+  function() external payable {
+    buyTokens(msg.sender);
+  }
 
-  function sellTokens(address _buyer) saleIsOn public payable {
+  function buyTokens(address _buyer) saleIsOn public payable {
     assert(_buyer != 0x0);
     if(msg.value > 0){
 
@@ -205,20 +209,17 @@ contract Crowdsale is owned, UNICToken {
           ) ||
           (now >= firstRoundICOStart && now <= firstRoundICOEnd && firstRoundICOTokensLimit > tokensSold + tokensWithBonus) ||
           (now >= secondRoundICOStart && now <= secondRoundICOEnd && secondRoundICOTokensLimit > tokensSold + tokensWithBonus)
-      )
+      ){
       
-      multisig.transfer(msg.value);
-      etherRaised = etherRaised.add(msg.value);
-      token.transfer(msg.sender, tokensWithBonus);
-      tokensSold = tokensSold.add(tokensWithBonus);
-      if(WhiteList[_buyer]==1) {
+        multisig.transfer(msg.value);
+        etherRaised = etherRaised.add(msg.value);
+        token.transfer(msg.sender, tokensWithBonus);
+        tokensSold = tokensSold.add(tokensWithBonus);
+        if(WhiteList[_buyer]==1) {
           tokensSoldWhitelist = tokensSoldWhitelist.add(tokensWithBonus);
+        }
       }
     }
-  }
- 
-  function() external payable {
-    sellTokens(msg.sender);
   }
 
   function crowdsaleDetails() public constant returns (uint, uint, uint) {
