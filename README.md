@@ -4,7 +4,6 @@ These are the smart contracts which will power the Ethereum side of our platform
 
 1. UNICToken
 1. UNICPlatform
-1. PPSContract
 
 ## UNICToken
 
@@ -25,7 +24,7 @@ UNICPlatform will be the contract that will be able to:
 * release UNICToken after November 30, 2018
 * transfer UNICToken from and to users address
 
-## UNIC PPS API
+# UNIC PPS API
 
 ## API overview
 
