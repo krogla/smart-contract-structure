@@ -153,8 +153,8 @@ contract Crowdsale is owned, UNICToken {
   uint public presaleWhitelistDiscount = 40;
   uint public presaleWhitelistTokensLimit = 750000 * 1000000000000000000;
 
-  uint public firstRoundICOStart = 1520503200;      /** 08.03 */
-  uint public firstRoundICOEnd = 1521712800;        /** 22.03 */
+  uint public firstRoundICOStart = 1520848800;      /** 12.03 */
+  uint public firstRoundICOEnd = 1522058400;        /** 26.03 */
   uint public firstRoundICODiscount = 15;
   uint public firstRoundICOTokensLimit = 6250000 * 1000000000000000000;
 
