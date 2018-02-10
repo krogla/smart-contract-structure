@@ -144,10 +144,10 @@ contract Crowdsale is owned, UNICToken {
   UNICToken public token = new UNICToken();
   
   address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
-  uint constant rate = 3400;
+  uint constant rate = 3400 * 1000000000000000000;
   
   uint public constant presaleStart = 1518084000;   /** 08.02 */
-  uint public presaleEnd = 1518861600;              /** 17.02 */
+  uint public presaleEnd = 1520244000;              /** 05.03 */
   uint public presaleDiscount = 30;
   uint public presaleTokensLimit = 4250000 * 1000000000000000000;
   uint public presaleWhitelistDiscount = 40;
@@ -224,6 +224,5 @@ contract Crowdsale is owned, UNICToken {
 
   function crowdsaleDetails() public constant returns (uint, uint, uint) {
     return (etherRaised, tokensSold, tokensSoldWhitelist);
-  }
-    
+  }   
 }
