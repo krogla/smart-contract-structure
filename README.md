@@ -22,15 +22,57 @@ UNICToken is an ERC20 Token with added features enabling the UNIC contract to:
 UNICPlatform will be the contract that will be able to:
 
 * lock in UNICToken through transferFrom, an ERC20 standard function
-* release UNICToken after November 30, 2020
+* release UNICToken after November 30, 2018
 * transfer UNICToken from and to users address
 
-## PPSContract
+## UNIC PPS API
 
-The PPSContract is ERC20 Library for import to advertisers smart-contracts. It will be able to:
+# API overview
 
-* lock in UNICToken through transferFrom, an ERC20 standard function
-* transfer UNICToken from advertiser address to publisher address after confirmed sale
+The API supports HTTP and HTTPS.
+
+# API Usage
+
+`https://api.unicads.net/pps`
+
+# Request types
+
+There are two general types of request:
+
+| request       | description                       |
+|:--------------|:----------------------------------|
+| `?get_widget`      | Request to UNIC PPS API to get widget content |
+| `?store_address`  | Store visitor Ethereum address in UNIC referal data base. |
+
+# API Fields
+
+`get_widget` request to UNIC API server contain following fields:
+
+* public_key
+* widget_type (wordpress, joomla, drupal, dle, magento, php, html)
+
+`store_address` request to UNIC API server contain following fields:
+
+* public_key
+* pub_id
+* eth_address
+* user_ip
+
+# Result types
+
+| request       | result type                       |
+|:--------------|:----------------------------------|
+| `?get_widget`      | returns a JavaScript code of widget. |
+| `?store_address`  | return a JSON with status: 1 or 0 |
+
+# UNIC PPS Widget
+
+Widget JavaScript code content include HTML form with offer for visitor of advertiser's website to:
+* Get agree with UNIC terms;
+* Fill out a form with Ethereum address, from which visitor would transfer ETH to advertiser smart-contract to buy advertiser's tokens.
+
+On form submition widget send API request to UNIC API server with `?store_address` request.
+On submition complete visitor get access to advertiser's smart-contract address.
 
 ## Authors
 
