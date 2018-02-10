@@ -27,15 +27,15 @@ UNICPlatform will be the contract that will be able to:
 
 ## UNIC PPS API
 
-# API overview
+## API overview
 
 The API supports HTTP and HTTPS.
 
-# API Usage
+## API Usage
 
 `https://api.unicads.net/pps`
 
-# Request types
+## Request types
 
 There are two general types of request:
 
@@ -44,7 +44,7 @@ There are two general types of request:
 | `?get_widget`      | Request to UNIC PPS API to get widget content |
 | `?store_address`  | Store visitor Ethereum address in UNIC referal data base. |
 
-# API Fields
+## API Fields
 
 `get_widget` request to UNIC API server contain following fields:
 
@@ -58,14 +58,14 @@ There are two general types of request:
 * eth_address
 * user_ip
 
-# Result types
+## Result types
 
 | request       | result type                       |
 |:--------------|:----------------------------------|
 | `?get_widget`      | returns a JavaScript code of widget. |
 | `?store_address`  | return a JSON with status: 1 or 0 |
 
-# UNIC PPS Widget
+## UNIC PPS Widget
 
 Widget JavaScript code content include HTML form with offer for visitor of advertiser's website to:
 * Get agree with UNIC terms;
