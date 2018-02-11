@@ -221,8 +221,4 @@ contract Crowdsale is owned, UNICToken {
       }
     }
   }
-
-  function crowdsaleDetails() public constant returns (uint, uint, uint) {
-    return (etherRaised, tokensSold, tokensSoldWhitelist);
-  }   
 }
