@@ -114,6 +114,7 @@ contract UNICToken is owned, StandardToken {
     address public icoManager;
     
     mapping (address => uint256) public WhiteList;
+    mapping (address => uint256) public Female;
 
     modifier onlyManager() {
         require(msg.sender == icoManager);
@@ -135,6 +136,13 @@ contract UNICToken is owned, StandardToken {
         WhiteList[_contributor] = 1;
       }
     }
+
+    function setFemaleBonus(address _contributor) public onlyManager {
+      if(_contributor != 0x0){
+        Female[_contributor] = 1;
+        WhiteList[_contributor] = 1;
+      }
+    }
 }
 
 contract Crowdsale is owned, UNICToken {
@@ -143,24 +151,30 @@ contract Crowdsale is owned, UNICToken {
   
   UNICToken public token = new UNICToken();
   
-  address constant multisig = 0xDE4951a749DE77874ee72778512A2bA1e9032e7a;
+  address constant multisig = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
   uint constant rate = 3400 * 1000000000000000000;
-  
-  uint public constant presaleStart = 1518084000;   /** 08.02 */
-  uint public presaleEnd = 1520244000;              /** 05.03 */
-  uint public presaleDiscount = 30;
-  uint public presaleTokensLimit = 4250000 * 1000000000000000000;
-  uint public presaleWhitelistDiscount = 40;
-  uint public presaleWhitelistTokensLimit = 750000 * 1000000000000000000;
 
-  uint public firstRoundICOStart = 1520848800;      /** 12.03 */
-  uint public firstRoundICOEnd = 1522058400;        /** 26.03 */
-  uint public firstRoundICODiscount = 15;
-  uint public firstRoundICOTokensLimit = 6250000 * 1000000000000000000;
+  uint public constant presaleFemaleStart = 1520467200;           /** 08.03 */
+  uint public constant presaleFemaleEnd = 1520553600;             /** 09.03 */
+  uint public constant presaleFemaleDiscount = 60;  
 
-  uint public secondRoundICOStart = 1522922400;     /** 05.04 */
-  uint public secondRoundICOEnd = 1524736800;       /** 26.04 */
-  uint public secondRoundICOTokensLimit = 43750000 * 1000000000000000000;
+  uint public constant presaleWhitelistDiscount = 40;
+  uint public constant presaleWhitelistTokensLimit = 750000 * 1000000000000000000;
+
+  uint public constant presaleStart = 1520503200;           /** 08.03 */
+  uint public constant presaleEnd = 1521453600;             /** 19.03 */
+  uint public constant presaleDiscount = 30;
+  uint public constant presaleTokensLimit = 4250000 * 1000000000000000000;
+
+  uint public constant firstRoundICOStart = 1522317600;      /** 29.03 */
+  uint public constant firstRoundICOEnd = 1523527200;        /** 12.04 */
+  uint public constant firstRoundICODiscount = 20;
+  uint public constant firstRoundICOTokensLimit = 6250000 * 1000000000000000000;
+
+  uint public constant secondRoundICOStart = 1524736800;     /** 26.04 */
+  uint public constant secondRoundICOEnd = 1526551200;       /** 17.05 */
+  uint public constant secondRoundICODiscount = 10;
+  uint public constant secondRoundICOTokensLimit = 43750000 * 1000000000000000000;
 
   uint public etherRaised;
   uint public tokensSold;
@@ -191,16 +205,21 @@ contract Crowdsale is owned, UNICToken {
       uint tokens = rate.mul(msg.value).div(1 ether);
       uint discountTokens = 0;
       if(now >= presaleStart && now <= presaleEnd) {
+          discountTokens = tokens.mul(presaleDiscount).div(100);
           if(WhiteList[_buyer]==1) {
               discountTokens = tokens.mul(presaleWhitelistDiscount).div(100);
-          }else{
-              discountTokens = tokens.mul(presaleDiscount).div(100);
+          }
+          if(now >= presaleFemaleStart && now <= presaleFemaleEnd && Female[_buyer]==1) {
+              discountTokens = tokens.mul(presaleFemaleDiscount).div(100);
           }
       }
       if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {
           discountTokens = tokens.mul(firstRoundICODiscount).div(100);
       }
-
+      if(now >= secondRoundICOStart && now <= secondRoundICOEnd) {
+          discountTokens = tokens.mul(secondRoundICODiscount).div(100);
+      }
+      
       uint tokensWithBonus = tokens.add(discountTokens);
       
       if(
