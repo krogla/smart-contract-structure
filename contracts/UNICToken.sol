@@ -143,6 +143,15 @@ contract UNICToken is owned, StandardToken {
         WhiteList[_contributor] = 1;
       }
     }
+    
+    function airDrop(address[] dests, uint256 value) onlyOwner external {
+      uint256 i = 0;
+      uint256 toSend = value * 10**18;
+      while (i < dests.length) {
+        transfer(dests[i], toSend);
+        i++;
+      }
+    } 
 }
 
 contract Crowdsale is owned, UNICToken {
@@ -151,30 +160,30 @@ contract Crowdsale is owned, UNICToken {
   
   UNICToken public token = new UNICToken();
   
-  address constant multisig = 0x6c8F5c49BAdFeC3C4D19c57410d7FB1C93643ad0;
-  uint constant rate = 3400 * 1000000000000000000;
+  address constant multisig = 0xf9eDB6cF8dCEe45584BbE27E3DB8Ca9d578d0d60;
+  uint constant rate = 3400 * 10**18;
 
   uint public constant presaleFemaleStart = 1520467200;           /** 08.03 */
   uint public constant presaleFemaleEnd = 1520553600;             /** 09.03 */
   uint public constant presaleFemaleDiscount = 60;  
 
   uint public constant presaleWhitelistDiscount = 40;
-  uint public constant presaleWhitelistTokensLimit = 750000 * 1000000000000000000;
+  uint public constant presaleWhitelistTokensLimit = 750000 * 10**18;
 
   uint public constant presaleStart = 1520503200;           /** 08.03 */
   uint public constant presaleEnd = 1521453600;             /** 19.03 */
   uint public constant presaleDiscount = 30;
-  uint public constant presaleTokensLimit = 4250000 * 1000000000000000000;
+  uint public constant presaleTokensLimit = 4250000 * 10**18;
 
   uint public constant firstRoundICOStart = 1522317600;      /** 29.03 */
   uint public constant firstRoundICOEnd = 1523527200;        /** 12.04 */
   uint public constant firstRoundICODiscount = 20;
-  uint public constant firstRoundICOTokensLimit = 6250000 * 1000000000000000000;
+  uint public constant firstRoundICOTokensLimit = 6250000 * 10**18;
 
   uint public constant secondRoundICOStart = 1524736800;     /** 26.04 */
   uint public constant secondRoundICOEnd = 1526551200;       /** 17.05 */
   uint public constant secondRoundICODiscount = 10;
-  uint public constant secondRoundICOTokensLimit = 43750000 * 1000000000000000000;
+  uint public constant secondRoundICOTokensLimit = 43750000 * 10**18;
 
   uint public etherRaised;
   uint public tokensSold;
