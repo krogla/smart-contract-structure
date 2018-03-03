@@ -110,6 +110,8 @@ contract UNICToken is owned, StandardToken {
     uint8 public constant decimals = 18;
     
     uint256 public initialSupply = 250000000 * 10 ** uint256(decimals);
+
+    uint public constant airDropLimit = 1000000 * 10**18;
     
     address public icoManager;
     
@@ -163,9 +165,29 @@ contract Crowdsale is owned, UNICToken {
   address constant multisig = 0xf9eDB6cF8dCEe45584BbE27E3DB8Ca9d578d0d60;
   uint constant rate = 3400 * 10**18;
 
-  uint public constant presaleFemaleStart = 1520467200;           /** 08.03 */
-  uint public constant presaleFemaleEnd = 1520553600;             /** 09.03 */
+/* <Marketing> */
+
+  uint public constant presaleFemaleStart = 1520467200;       /** 08.03 */
+  uint public constant presaleFemaleEnd = 1520553600;         /** 09.03 */
   uint public constant presaleFemaleDiscount = 60;  
+
+  uint public constant presalePiStart = 1520985600;           /** 14.03 The day of number PI */
+  uint public constant presalePiEnd = 1521072000;             /** 15.03 */
+  uint public constant presalePiDiscount = 34;
+
+  uint public constant presaleWMStart = 1522800000;           /** 04.04 The Day of webmaster 404 */
+  uint public constant presaleWMEnd = 1522886400;             /** 05.04 */
+  uint public constant presaleWMDiscount = 24;
+
+  uint public constant presaleCosmosStart = 1523491200;       /** 12.04 The day of cosmonautics */
+  uint public constant presaleCosmosEnd = 1523577600;         /** 13.04 */
+  uint public constant presaleCosmosDiscount = 24;
+
+  uint public constant presaleMayStart = 1525132800;          /** 01.05 International Solidarity Day for Workers */
+  uint public constant presaleMayEnd = 1525219200;            /** 02.05 */
+  uint public constant presaleMayDiscount = 15;
+
+/* </Marketing> */
 
   uint public constant presaleWhitelistDiscount = 40;
   uint public constant presaleWhitelistTokensLimit = 750000 * 10**18;
@@ -173,7 +195,7 @@ contract Crowdsale is owned, UNICToken {
   uint public constant presaleStart = 1520503200;           /** 08.03 */
   uint public constant presaleEnd = 1521453600;             /** 19.03 */
   uint public constant presaleDiscount = 30;
-  uint public constant presaleTokensLimit = 4250000 * 10**18;
+  uint public constant presaleTokensLimit = 5000000 * 10**18;
 
   uint public constant firstRoundICOStart = 1522317600;      /** 29.03 */
   uint public constant firstRoundICOEnd = 1523527200;        /** 12.04 */
@@ -221,12 +243,24 @@ contract Crowdsale is owned, UNICToken {
           if(now >= presaleFemaleStart && now <= presaleFemaleEnd && Female[_buyer]==1) {
               discountTokens = tokens.mul(presaleFemaleDiscount).div(100);
           }
+          if(now >= presalePiStart && now <= presalePiEnd) {
+              discountTokens = tokens.mul(presalePiDiscount).div(100);
+          }
       }
       if(now >= firstRoundICOStart && now <= firstRoundICOEnd) {
           discountTokens = tokens.mul(firstRoundICODiscount).div(100);
+          if(now >= presaleWMStart && now <= presaleWMEnd) {
+              discountTokens = tokens.mul(presaleWMDiscount).div(100);
+          }
+          if(now >= presaleCosmosStart && now <= presaleCosmosEnd) {
+              discountTokens = tokens.mul(presaleCosmosDiscount).div(100);
+          }
       }
       if(now >= secondRoundICOStart && now <= secondRoundICOEnd) {
           discountTokens = tokens.mul(secondRoundICODiscount).div(100);
+          if(now >= presaleMayStart && now <= presaleMayEnd) {
+              discountTokens = tokens.mul(presaleMayDiscount).div(100);
+          }
       }
       
       uint tokensWithBonus = tokens.add(discountTokens);
